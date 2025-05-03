@@ -1,0 +1,8 @@
+{
+    "internalServerError": "Internal Server Error",
+    "badRequest": "Bad Request",
+    "forbidden": "Forbidden",
+    "generalError": "Something went wrong",
+    "invalidCredientials": "Invalid email or password, please try again.",
+    "notFound": "Item not found"
+}

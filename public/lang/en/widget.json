@@ -1,0 +1,9 @@
+{
+    "listOfLists": {
+        "lists": "Your Lists",
+        "addList": "Add List"
+    },
+    "list": {
+        "addTask": "Add Task"
+    }
+}

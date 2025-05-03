@@ -1,0 +1,28 @@
+{
+    "newTask": {
+        "title": "Add New Task",
+        "task": "Task",
+        "counted": "Counted",
+        "tags": "tag(s)"
+    },
+    "addList": {
+        "title": "Add New List",
+        "label": "Enter List Name",
+        "icon": "Icon",
+        "color": "Color"
+    },
+    "editList": {
+        "title": "Edit List",
+        "label": "Enter List Name"
+    },
+    "editTask": {
+        "title": "Edit Task",
+        "task": {
+            "title": "Title",
+            "description": "Description",
+            "history": "History",
+            "addHistory": "Add History",
+            "addTag": "Add Tag"
+        }
+    }
+}

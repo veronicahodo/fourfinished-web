@@ -1,0 +1,24 @@
+{
+    "colors": {
+        "black": "Black",
+        "blue": "Blue",
+        "brown": "Brown",
+        "green": "Green",
+        "grey": "Grey",
+        "orange": "Orange",
+        "pink": "Pink",
+        "purple": "Purple",
+        "red": "Red",
+        "white": "White",
+        "yellow": "Yellow"
+    },
+    "icons": {
+        "circle": "Circle",
+        "square": "Square",
+        "star": "Star",
+        "clock": "Clock",
+        "heart": "Heart",
+        "person": "Person",
+        "pencil": "Pencil"
+    }
+}
