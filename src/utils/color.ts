@@ -2,7 +2,7 @@ const colors = {
     blue: "#1c98eb",
     orange: "#eb721c",
     red: "#eb1c1c",
-    green: "#1ceb1c",
+    green: "#0acb0a",
     purple: "#b721fa",
     white: "#ffffff",
     black: "#000000",

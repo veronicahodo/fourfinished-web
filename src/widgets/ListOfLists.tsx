@@ -17,26 +17,28 @@ const ListOfLists = ({ lists, onSelect, addList }: WidgetProps) => {
             <Typography variant="h5" sx={{ color: getColor("purple") }}>
                 Lists
             </Typography>
-            {lists.map((list) => (
-                <Box
-                    key={list.id}
-                    sx={{
-                        ml: 3,
-                        mb: 2,
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                    }}
-                    onClick={() => onSelect(list)}
-                >
-                    <span style={{ color: getColor(list.color) }}>
-                        {getIcon(list.icon ?? "star")}
-                    </span>
-                    <Typography variant="h6" sx={{ ml: 1 }}>
-                        {list.title}
-                    </Typography>
-                </Box>
-            ))}
+            {lists
+                .sort((a, b) => a.title.localeCompare(b.title))
+                .map((list) => (
+                    <Box
+                        key={list.id}
+                        sx={{
+                            ml: 3,
+                            mb: 2,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                        onClick={() => onSelect(list)}
+                    >
+                        <span style={{ color: getColor(list.color) }}>
+                            {getIcon(list.icon ?? "star")}
+                        </span>
+                        <Typography variant="h6" sx={{ ml: 1 }}>
+                            {list.title}
+                        </Typography>
+                    </Box>
+                ))}
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button onClick={() => addList()} variant="text">
                     {t("widget:listOfLists.addList")}

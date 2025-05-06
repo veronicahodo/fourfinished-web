@@ -14,10 +14,10 @@ const TaskWidget = ({ task, selectTask, markComplete }: WidgetProps) => {
     return (
         <Card
             sx={{
-                width: "80%",
+                width: "90%",
                 mx: "auto",
                 mb: 1,
-                p: 2,
+                p: 1,
             }}
             elevation={3}
         >
@@ -29,8 +29,14 @@ const TaskWidget = ({ task, selectTask, markComplete }: WidgetProps) => {
                     width: "100%",
                 }}
             >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <span>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        color: "gray",
+                    }}
+                >
+                    <span style={{ cursor: "pointer" }}>
                         {task.completion >= 100 ? (
                             <CheckBoxIcon onClick={() => markComplete(task)} />
                         ) : (

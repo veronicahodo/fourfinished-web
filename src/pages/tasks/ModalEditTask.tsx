@@ -52,6 +52,26 @@ const ModalEditTask = ({
             </DialogTitle>
             <DialogContent>
                 <Grid container spacing={2}>
+                    <Grid
+                        size={12}
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                        }}
+                    >
+                        <Button
+                            onClick={() => {
+                                onClose();
+                                updateTask({
+                                    ...workingTask,
+                                    archived: true,
+                                });
+                            }}
+                        >
+                            {t("modal:editTask.archive")}
+                        </Button>
+                    </Grid>
                     <Grid size={12}>
                         <TextField
                             autoFocus

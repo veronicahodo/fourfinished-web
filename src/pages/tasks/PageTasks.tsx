@@ -52,9 +52,9 @@ const PageTasks = ({ api, throwError, token }: PageProps) => {
             color: list.color ?? "blue",
         });
         if (addedList) {
-            list.children = await retrieveByParent(list.id);
-            setSelectedList(list);
-            setLists((prevLists) => [...prevLists, list]);
+            addedList.children = await retrieveByParent(list.id);
+            setSelectedList(addedList);
+            setLists((prevLists) => [...prevLists, addedList]);
         }
     };
 
@@ -67,43 +67,6 @@ const PageTasks = ({ api, throwError, token }: PageProps) => {
                 )
             );
             setSelectedList(updatedList);
-        }
-    };
-
-    const markComplete = async (task: Task) => {
-        // leave at double equals because MariaDB is garbage.
-        const newCompletion = task.completion == 100 ? 0 : 100;
-
-        const newTask = {
-            ...task,
-            completion: newCompletion,
-        };
-
-        const updatedTask = await updateTask(newTask);
-        if (updatedTask) {
-            setLists((prevLists) =>
-                prevLists.map((list) =>
-                    list.id === selectedList?.id
-                        ? {
-                              ...list,
-                              children: list.children?.map((child) =>
-                                  child.id === task.id ? updatedTask : child
-                              ),
-                          }
-                        : list
-                )
-            );
-            setSelectedList((prevList) =>
-                prevList?.id === (selectedList?.id ?? "")
-                    ? {
-                          ...prevList,
-                          children: prevList.children?.map((child) =>
-                              child.id === task.id ? updatedTask : child
-                          ),
-                      }
-                    : prevList
-            );
-            setSelectedTask(updatedTask);
         }
     };
 
@@ -152,6 +115,49 @@ const PageTasks = ({ api, throwError, token }: PageProps) => {
         }
     };
 
+    const handleUpdateTask = async (task: Task) => {
+        const updatedTask = await updateTask(task);
+        if (updatedTask) {
+            if (updatedTask.archived) {
+                setLists((prevLists) =>
+                    prevLists.map((list) =>
+                        list.id === selectedList?.id
+                            ? {
+                                  ...list,
+                                  children: list.children?.filter(
+                                      (child) => child.id !== task.id
+                                  ),
+                              }
+                            : list
+                    )
+                );
+                setSelectedList((prevList) =>
+                    prevList?.id === (selectedList?.id ?? "")
+                        ? {
+                              ...prevList,
+                              children: prevList.children?.filter(
+                                  (child) => child.id !== task.id
+                              ),
+                          }
+                        : prevList
+                );
+            } else {
+                setLists((prevLists) =>
+                    prevLists.map((list) =>
+                        list.id === selectedList?.id
+                            ? {
+                                  ...list,
+                                  children: list.children?.map((child) =>
+                                      child.id === task.id ? updatedTask : child
+                                  ),
+                              }
+                            : list
+                    )
+                );
+            }
+        }
+    };
+
     useEffect(() => {
         const fetchLists = async () => {
             const incomingLists = await retrieveAllLists();
@@ -169,10 +175,28 @@ const PageTasks = ({ api, throwError, token }: PageProps) => {
             {!isLargeWindow && (
                 <Autocomplete
                     id="lists"
-                    options={lists}
+                    options={[
+                        ...lists.sort((a, b) => a.title.localeCompare(b.title)),
+                        {
+                            id: "add",
+                            owner_id: "",
+                            color: "black",
+                            icon: "add",
+                            title: t("widget:listOfLists.addList"),
+                        },
+                    ]}
                     getOptionLabel={(option) => option.title}
                     value={selectedList ?? null}
-                    onChange={(_, value) => setSelectedList(value)}
+                    onChange={(_, value) => {
+                        if (value?.id === "add") {
+                            setEditList(null);
+                            setShowAddListModal(true);
+                        } else if (value?.id) {
+                            setSelectedList(value);
+                        } else {
+                            setSelectedList(null);
+                        }
+                    }}
                     renderOption={(props, option) => (
                         <Box
                             component="li"
@@ -213,7 +237,9 @@ const PageTasks = ({ api, throwError, token }: PageProps) => {
                 <Box sx={{ p: 3 }}>
                     {selectedList && (
                         <ListWidget
-                            key={selectedList.id}
+                            key={
+                                selectedList.id + selectedList.children?.length
+                            }
                             api={api}
                             list={selectedList}
                             addTask={() => setShowNewTaskModal(true)}
@@ -222,7 +248,6 @@ const PageTasks = ({ api, throwError, token }: PageProps) => {
                                 setSelectedTask(task);
                                 setShowEditTaskModal(true);
                             }}
-                            markComplete={markComplete}
                         />
                     )}
                     {!selectedList && <>Show me titties.</>}
@@ -238,7 +263,7 @@ const PageTasks = ({ api, throwError, token }: PageProps) => {
                 open={showEditTaskModal}
                 onClose={() => setShowEditTaskModal(false)}
                 task={selectedTask ?? DefaultTask}
-                updateTask={() => {}}
+                updateTask={handleUpdateTask}
                 token={token}
             />
             <ModalEditList

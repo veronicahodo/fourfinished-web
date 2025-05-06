@@ -15,7 +15,6 @@ interface WidgetProps {
     addTask: () => void;
     selectTask: (task: Task) => void;
     throwError: (code: number, message: string, translate?: boolean) => void;
-    markComplete: (task: Task) => void;
 }
 
 const ListWidget = ({
@@ -24,18 +23,20 @@ const ListWidget = ({
     addTask,
     throwError,
     selectTask,
-    markComplete,
 }: WidgetProps) => {
     const { t } = useTranslation();
     const { loading: listLoading } = useList(api);
-    const { loading: taskLoading, retrieveByParent } = useTask(api, throwError);
+    const {
+        loading: taskLoading,
+        updateTask,
+        retrieveByParent,
+    } = useTask(api, throwError);
     const [loading, setLoading] = useState<boolean>(false);
-
     const [tasks, setTasks] = useState<Task[]>([]);
 
     const getChildren = useCallback(
         async (parentId: string, depth = 1): Promise<Task[]> => {
-            if (depth > 10) return [];
+            if (depth > 1) return [];
 
             const children = (await retrieveByParent(parentId)) ?? [];
 
@@ -49,13 +50,33 @@ const ListWidget = ({
         [retrieveByParent]
     );
 
-    const getTasks = useCallback(
-        async (listId: string) => {
-            const allTasks = await getChildren(listId);
-            setTasks(allTasks);
-        },
-        [list]
-    );
+    const markComplete = async (task: Task) => {
+        // leave at double equals because MariaDB is garbage.
+        const newCompletion = task.completion == 100 ? 0 : 100;
+
+        const newTask = {
+            ...task,
+            completion: newCompletion,
+        };
+
+        const oldTasks = tasks;
+
+        setTasks((prevTasks) =>
+            prevTasks.map((prevTask) =>
+                prevTask.id === task.id ? newTask : prevTask
+            )
+        );
+
+        const updatedTask = await updateTask(newTask);
+        if (!updatedTask) {
+            setTasks(oldTasks);
+        }
+    };
+
+    const getTasks = useCallback(async (listId: string) => {
+        const allTasks = await getChildren(listId);
+        setTasks(allTasks);
+    }, []);
 
     useEffect(() => {
         setLoading(taskLoading || listLoading);
@@ -63,10 +84,10 @@ const ListWidget = ({
 
     useEffect(() => {
         getTasks(list.id);
-    }, [list, getTasks]);
+    }, [getTasks, list.id]);
 
     return (
-        <Card sx={{ minWidth: 300, maxWidth: 900, p: 3 }}>
+        <Card sx={{ minWidth: 300, maxWidth: 900, pb: 1 }}>
             <Box
                 sx={{
                     backgroundColor: getColor(list.color),
@@ -75,7 +96,7 @@ const ListWidget = ({
                     mb: 3,
                     display: "flex",
                     alignItems: "center",
-                    borderRadius: 2,
+                    borderRadius: 1,
                 }}
             >
                 <span>{getIcon(list.icon ?? "star")}</span>
@@ -83,8 +104,23 @@ const ListWidget = ({
                     {list.title}
                 </Typography>
             </Box>
-            {loading && <></>}
-            {tasks.length > 0 &&
+            {loading && <>{t("loading")}</>}
+
+            {!loading && (
+                <Box
+                    sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}
+                >
+                    <Button
+                        onClick={() => addTask()}
+                        variant="contained"
+                        sx={{ mr: 2 }}
+                    >
+                        {t("widget:list.addTask")}
+                    </Button>
+                </Box>
+            )}
+            {!loading &&
+                tasks.length > 0 &&
                 tasks
                     .sort((a, b) => a.completion - b.completion)
                     .map((task) => (
@@ -95,11 +131,7 @@ const ListWidget = ({
                             markComplete={markComplete}
                         />
                     ))}
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button onClick={() => addTask()} variant="contained">
-                    {t("widget:list.addTask")}
-                </Button>
-            </Box>
+            {!loading && tasks.length === 0 && <>{t("widget:list.noTasks")}</>}
         </Card>
     );
 };

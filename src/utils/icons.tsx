@@ -5,6 +5,7 @@ import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
 import EditIcon from "@mui/icons-material/Edit";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonIcon from "@mui/icons-material/Person";
+import AddIcon from "@mui/icons-material/Add";
 import { ReactElement } from "react";
 
 const icons = {
@@ -15,6 +16,7 @@ const icons = {
     pencil: EditIcon,
     heart: FavoriteIcon,
     person: PersonIcon,
+    add: AddIcon,
 };
 
 export const getIcon = (icon: string): ReactElement => {
